@@ -1,0 +1,4 @@
+baseURL = "https://berfr.me/"
+languageCode = "en-us"
+title = "berfr blog"
+disableKinds = ["taxonomy", "taxonomyTerm", "RSS", "section"]
