@@ -1,16 +1,17 @@
 <!DOCTYPE html>
 <html lang="{{ .Site.LanguageCode | default "en" }}">
+<head>
+    <title>{{ .Site.Title }}{{ if ne .Title .Site.Title }} | {{ .Title }}{{ end }}</title>
 
-<title>{{ .Site.Title }}{{ if ne .Title .Site.Title }} | {{ .Title }}{{ end }}</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="canonical" href="{{ .Permalink }}">
+    <link rel="stylesheet" href="{{ .Site.BaseURL }}css/styles.css">
+</head>
+<body>
+    <header><h2><a href="{{ .Site.BaseURL }}">{{ .Site.Title }}</a></h2></header>
 
-<link rel="canonical" href="{{ .Permalink }}">
-<link rel="stylesheet" href="{{ .Site.BaseURL }}css/styles.css">
-
-<header><h2><a href="{{ .Site.BaseURL }}">{{ .Site.Title }}</a></h2></header>
-
-{{- block "main" . }}{{- end }}
-
+    {{- block "main" . }}{{- end }}
+</body>
 </html>
