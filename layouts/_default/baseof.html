@@ -10,8 +10,18 @@
     <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
-    <header><h2><a href="/">{{ .Site.Title }}</a></h2></header>
+    <header>
+        <h2><a href="/">{{ .Site.Title }}</a></h2>
+    </header>
 
+    <hr>
     {{- block "main" . }}{{- end }}
+    <hr>
+
+    <footer>
+        <p><a href="https://git.sr.ht/~berfr">https://git.sr.ht/~berfr</a></p>
+        <p><a href="/publickey.txt">67CA4E4F727349D3</a></p>
+        <p><a href="mailto:me@berfr.me">me@berfr.me</a></p>
+    </footer>
 </body>
 </html>
