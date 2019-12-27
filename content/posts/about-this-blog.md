@@ -1,5 +1,5 @@
 ---
-title: "About This Blog"
+title: About this blog
 date: 2019-12-20
 ---
 
