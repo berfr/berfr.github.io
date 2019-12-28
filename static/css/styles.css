@@ -18,6 +18,16 @@ body {
     padding-right: 0.25em;
 }
 
+a {
+    color: blue;
+    text-decoration: none;
+}
+
+a:hover {
+    color: royalblue;
+    text-decoration: underline;
+}
+
 footer {
     margin-top: 1em;
 }
