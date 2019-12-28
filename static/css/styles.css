@@ -4,6 +4,20 @@ body {
     padding: 10px;
 }
 
+.posts-list ul {
+    list-style: none;
+    padding-left: 0;
+}
+
+.posts-list li {
+    margin: 0.25em 0;
+}
+
+.posts-list time {
+    font-family: monospace, monospace;
+    padding-right: 0.25em;
+}
+
 footer {
     margin-top: 1em;
 }
