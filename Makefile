@@ -1,7 +1,7 @@
 .PHONY: build deploy
 
 build:
-	hugo --cleanDestinationDir
+	hugo --cleanDestinationDir --minify
 
 deploy: build
 	./deploy.sh
