@@ -28,6 +28,14 @@ a:hover {
     text-decoration: underline;
 }
 
+.post h1 {
+    margin-bottom: 0.25em;
+}
+
+.post time {
+    margin-bottom: 1.5em;
+}
+
 footer {
     margin-top: 1em;
 }
