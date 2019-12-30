@@ -5,7 +5,7 @@ date: 2019-12-27
 
 In this post, I'll simply share a few observations on setting up a FreeRTOS
 project for the STM32F4 Discovery board. This guide is based on the
-[berfr/stm32f4discovery](https://git.sr.ht/~berfr/stm32f4discovery) repository
+[~berfr/stm32f4discovery](https://git.sr.ht/~berfr/stm32f4discovery) repository
 which is fully configured and ready to use. The specific commands mentioned in
 this post are noted in the `README` or the `CMakeLists` files of the project.
 
