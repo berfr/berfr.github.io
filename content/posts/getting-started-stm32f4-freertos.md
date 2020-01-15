@@ -96,7 +96,7 @@ $ arm-none-eabi-size main.elf
 # That is an 88% or 81 KB size decrease with the flags.
 ```
 
-# FreeRTOS time slicing
+## FreeRTOS time slicing
 
 In the reference project, two tasks with the same priority are started and it is
 the responsibility of the real time kernel to run them both concurrently. It
@@ -109,7 +109,7 @@ over its time to another task depending on the context. By using different
 priority levels in different tasks, it is possible to put more importance on
 certain tasks according to the application needs.
 
-# Chip programming and debugging
+## Chip programming and debugging
 
 The [texane/stlink](https://github.com/texane/stlink) project offers convenient
 tools to program and debug the MCU. For programming, it is necessary to create a
@@ -122,7 +122,7 @@ file. This `elf` file contains the necessary symbols to ease the debugging
 process. Standard `gdb` commands can then be used to step through code and
 observe CPU registers.
 
-# Future investigations
+## Future investigations
 
 In future posts, I would like to investigate further the following aspects:
 
