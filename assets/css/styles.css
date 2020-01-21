@@ -57,3 +57,11 @@ img {
     display: block;
     margin: 0 auto;
 }
+
+pre {
+    background-color: cornsilk;
+    padding: 14px;
+    border-left-style: solid;
+    border-left-width: 2px;
+    border-left-color: orange;
+}
