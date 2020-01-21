@@ -36,8 +36,8 @@ a:hover {
     margin-bottom: 0.25em;
 }
 
-.post time {
-    margin-bottom: 1.5em;
+.post-time {
+    font-size: 0.75em;
 }
 
 footer {

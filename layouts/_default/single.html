@@ -3,9 +3,16 @@
 <article class="post">
     <header>
         <h1>{{ .Title }}</h1>
-        <time datetime="{{ .Date.Format "2006-01-02T15:04:05Z07:00" }}">
-            {{ .Date.Format "January 02, 2006" }}
-        </time>
+        <div class="post-time">
+            {{ $date := .Date.Format "January 02, 2006" }}
+            {{ $lastmod := .Lastmod.Format "January 02, 2006" }}
+
+            Posted on {{ $date }}.
+
+            {{ if ne $date $lastmod }}
+                Last modified on {{ $lastmod }}.
+            {{ end }}
+        </div>
     </header>
     {{ .Content }}
 </article>
