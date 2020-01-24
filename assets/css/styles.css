@@ -68,3 +68,7 @@ pre {
     border-left-color: orange;
     overflow-x: auto;
 }
+
+.footnotes hr {
+    border: 0px;
+}
