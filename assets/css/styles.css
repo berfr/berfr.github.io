@@ -64,4 +64,5 @@ pre {
     border-left-style: solid;
     border-left-width: 2px;
     border-left-color: orange;
+    overflow-x: auto;
 }
