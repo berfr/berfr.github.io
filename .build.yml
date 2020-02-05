@@ -1,0 +1,17 @@
+image: fedora/31
+packages:
+    - awscli
+    - hugo
+sources:
+    - https://git.sr.ht/~berfr/berfr.me
+secrets:
+    - 1af67a38-6cf0-4f09-98fc-8776b8987160
+tasks:
+    - build: |
+        cd berfr.me
+        make build
+    - deploy: |
+        cd berfr.me
+        if git describe --exact-match HEAD; then
+            make deploy
+        fi
