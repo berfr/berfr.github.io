@@ -61,7 +61,7 @@ Another observation is that the linker script places the Interrupt Vector Table
 at the beginning of the flash address space. This vector table is located in the
 assembly startup code file:
 
-```assembly
+```asm
 g_pfnVectors:
   .word  _estack
   .word  Reset_Handler
@@ -82,7 +82,7 @@ In order to reduce the firmware size for the MCU, it is necessary to pass the
 functions from the output binary. It is possible to see the size difference with
 the `size` command.
 
-```console
+```shell
 # Here is the output size with the unused code removed:
 $ arm-none-eabi-size main.elf
  text    data     bss     dec     hex filename
