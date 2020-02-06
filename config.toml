@@ -3,3 +3,6 @@ languageCode = "en-us"
 title = "berfr blog"
 disableKinds = ["taxonomy", "taxonomyTerm", "section"]
 enableGitInfo = true
+
+pygmentsCodeFences = true
+pygmentsUseClasses = true

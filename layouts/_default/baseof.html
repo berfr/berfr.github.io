@@ -8,8 +8,10 @@
 
     <link rel="canonical" href="{{ .Permalink }}">
 
-    {{- $styles := resources.Get "css/styles.css" | resources.Minify }}
-    <link rel="stylesheet" href="{{ $styles.RelPermalink }}">
+    {{- $syntax := resources.Get "css/syntax.css" }}
+    {{- $styles := resources.Get "css/styles.css" }}
+    {{- $css := slice $syntax $styles | resources.Concat "css/styles.css" | resources.Minify }}
+    <link rel="stylesheet" href="{{ $css.RelPermalink }}">
 </head>
 <body>
     <header>
