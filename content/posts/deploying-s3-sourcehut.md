@@ -62,7 +62,7 @@ secrets] so it is available during CI builds. Create a new secret of `File` type
 at `~/.aws/credentials` with the content in this format:
 
 ```
-[default]
+[s3-berfr.me]
 aws_access_key_id=AKIAIOSFODNN7EXAMPLE
 aws_secret_access_key=wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
 ```
@@ -128,6 +128,11 @@ deploy: build
 release: build
 	git tag -s -a "`date +\"%y-%m-%d-%H-%M\"`" -m "`date`"
 ```
+
+By using a Makefile, we can make changes to the commands needed in a single file
+and use it both locally and in the build manifest. The same goes for specifying
+a unique AWS profile name such as `s3-berfr.me`; we are able to use it in both
+environments.
 
 With these two files pushed to [git.sr.ht], the build should automatically start
 and be visible at [builds.sr.ht]. To trigger a deployment, simply run `make
