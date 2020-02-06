@@ -1,5 +1,7 @@
 body {
     font-family: Sans-Serif;
+    font-size: 16px;
+    line-height: 1.5;
     max-width: 800px;
     margin: auto;
     padding: 10px;
@@ -62,15 +64,18 @@ img {
 }
 
 pre.chroma {
-    background-color: floralwhite;
+    background-color: antiquewhite;
+}
+
+code {
+    font-family: monospace, monospace;
+    background-color: antiquewhite;
 }
 
 pre {
-    background-color: floralwhite;
+    font-family: monospace, monospace;
+    background-color: antiquewhite;
     padding: 14px;
-    border-left-style: solid;
-    border-left-width: 2px;
-    border-left-color: orange;
     overflow-x: auto;
 }
 
