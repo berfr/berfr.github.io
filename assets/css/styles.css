@@ -18,11 +18,12 @@ h1 {
 
 .posts-list li {
     margin: 0.25em 0;
+    display: flex;
 }
 
 .posts-list time {
     font-family: monospace, monospace;
-    padding-right: 0.25em;
+    padding-right: 1em;
 }
 
 a {
