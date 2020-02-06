@@ -1,5 +1,5 @@
 ---
-title: Deploy to S3 with Sourcehut
+title: Deploying to S3 with Sourcehut
 date: 2020-02-05
 ---
 
