@@ -45,12 +45,14 @@ Instead, it relies on a few packages from the Standard Library. These include:
 
 - [`argparse`]: Handle arguments passed to the CLI command.
 - [`datetime`]: Manage timestamps for command runs.
+- [`difflib`]: Get nice looking diffs of command outputs.
 - [`email`]: Used to add multiple parts and message IDs to email.
 - [`smtplib`]: Communication with SMTP server.
 - [`subprocess`]: Calling the actual command and reading the output.
 
 [`argparse`]: https://docs.python.org/3/library/argparse.html
 [`datetime`]: https://docs.python.org/3/library/datetime.html
+[`difflib`]: https://docs.python.org/3/library/difflib.html
 [`email`]: https://docs.python.org/3/library/email.html
 [`smtplib`]: https://docs.python.org/3/library/smtplib.html
 [`subprocess`]: https://docs.python.org/3/library/subprocess.html
