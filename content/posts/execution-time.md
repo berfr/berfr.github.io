@@ -54,11 +54,12 @@ sys     0m0.008s
 
 This time though, my computer was completely silent during the execution. As if nothing was being done. If you look at the source of [`time.sleep`], and to the called cross platform [`pysleep`] function, you will see that the underlying mechanism for wasting time is a call to [`select`] with no watched file descriptor sets and the desired timeout. From this point, it is up to the operating system to return when the amount of time is elapsed.
 
-The actual CPU time can be seen in the values returned by the `time` command. The `user` and `sys` parts is the time that was taken for running code in user-mode and in kernel-mode respectively. The first program spent all the time running code whereas the second spent almost no time running code.
+The actual CPU time can be seen in the values returned by the [`time`] command. The `user` and `sys` parts is the time that was taken for running code in user-mode and in kernel-mode respectively. The first program spent all the time running code whereas the second spent almost no time running code.
 
 [`time.sleep`]: https://github.com/python/cpython/blob/62183b8d6d49e59c6a98bbdaa65b7ea1415abb7f/Modules/timemodule.c#L326
 [`pysleep`]: https://github.com/python/cpython/blob/62183b8d6d49e59c6a98bbdaa65b7ea1415abb7f/Modules/timemodule.c#L1859
-[`select`]: https://en.wikipedia.org/wiki/Select_(Unix)
+[`select`]: https://linux.die.net/man/3/select
+[`time`]: https://linux.die.net/man/1/time
 
 We will now test out a similar program in C:
 
