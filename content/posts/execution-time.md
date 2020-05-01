@@ -64,7 +64,9 @@ operating system to return when the amount of time is elapsed.
 The actual CPU time can be seen in the values returned by the [`time`] command.
 The `user` and `sys` parts is the time that was taken for running code in
 user-mode and in kernel-mode respectively. The first program spent all the time
-running code whereas the second spent almost no time running code.
+running code whereas the second spent almost no time running code. While they
+have the same behavior, it could be argued that the second script is better
+since it leaves CPU time for the OS to perform more important tasks.
 
 [`time.sleep`]: https://github.com/python/cpython/blob/62183b8d6d49e59c6a98bbdaa65b7ea1415abb7f/Modules/timemodule.c#L326
 [`pysleep`]: https://github.com/python/cpython/blob/62183b8d6d49e59c6a98bbdaa65b7ea1415abb7f/Modules/timemodule.c#L1859
