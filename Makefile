@@ -1,10 +1,14 @@
-.PHONY: build deploy release
+.PHONY: setup build publish
+
+setup:
+	rm -rf public
+	git clone git@github.com:berfr/berfr.github.io.git public
 
 build:
-	hugo --cleanDestinationDir --minify
+	rm -rf public/*
+	hugo --minify
 
-deploy: build
-	aws --region ca-central-1 --profile s3-berfr.me s3 sync public/ s3://berfr.me/ --delete
-
-release: build
-	git tag -s -a "`date +\"%y-%m-%d-%H-%M\"`" -m "`date`"
+publish: setup build
+	git -C public add --all
+	git -C public commit -m "Publishing to gh-pages: $(shell date +%y-%m-%d\ %H:%M)"
+	git -C public push origin master
