@@ -1,0 +1,26 @@
+name: Main workflow
+on: push
+
+jobs:
+  build:
+    name: Build and Publish
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: Install Hugo
+        run: sudo snap install hugo --channel=extended
+      - name: Set up SSH key
+        env:
+          DEPLOY_KEY: ${{ secrets.DEPLOY_KEY }}
+        run: |
+          mkdir ~/.ssh
+          echo "$DEPLOY_KEY" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+      - name: Set up public directory
+        run: make setup
+      - name: Build website
+        run: GIT_CONFIG_NOSYSTEM=true make build
+      - name: Publish website
+        run: make publish
