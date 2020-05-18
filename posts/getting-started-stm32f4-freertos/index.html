@@ -1,0 +1,74 @@
+<!doctype html><html lang=en-us><head><title>Getting started with the STM32F4 and FreeRTOS | berfr blog</title><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1"><link rel=canonical href=https://berfr.me/posts/getting-started-stm32f4-freertos/><link rel=stylesheet href=/css/styles.min.css></head><body><header><h2><a href=/>berfr blog</a></h2></header><hr><article class=post><header><h1>Getting started with the STM32F4 and FreeRTOS</h1><div class=post-time>Posted on December 27, 2019.
+Last modified on February 05, 2020.</div></header><p>In this post, I&rsquo;ll simply share a few observations on setting up a FreeRTOS
+project for the STM32F4 Discovery board. This guide is based on the
+<a href=https://git.sr.ht/~berfr/stm32f4discovery>~berfr/stm32f4discovery</a> repository
+which is fully configured and ready to use. The specific commands mentioned in
+this post are noted in the <code>README</code> or the <code>CMakeLists</code> files of the project.</p><h2 id=hardware>Hardware</h2><p>The STM32F4 Discovery board has the following core components:</p><ul><li>STM32F407VGT6 Microcontroller<ul><li>32-bit ARM Corex-M4 with FPU Core<ul><li>ARMv7E-M Architecture</li><li>Thumb-1, Thumb-2, DSP, FPU (Single Precision) instruction sets</li><li>Single Precision FPU: fpv4-sp-d16</li></ul></li><li>16 MHz High Speed Internal (HSI) RC Oscillator</li></ul></li><li>ST-LINK/V2 used for programming and debugging</li><li>8 MHz High Speed External (HSE) Oscillator</li></ul><h2 id=clock-configuration>Clock configuration</h2><p>On start up, the 16 MHz internal oscillator is selected as CPU clock. Through
+software, we can select to use an external oscillator as clock source. This
+clock source is fed to a phase lock loop (PLL) which can increase the frequency
+up to 168 MHz. The clock is set up using the <code>SystemCoreClockUpdate</code> function
+from the <code>system_stm32f4xx.c</code> file. By default, for this MCU, the clock speed is
+configured using the HSE and PLL to output 168 MHz. However, the default HSE
+value is 25 MHz and so we need to modify it to 8 MHz. The <code>PLL_M</code> is also
+modified from 25 to 8. The calculation for the <code>SYSCLK</code> value is as follows:</p><pre><code>SYSCLK = ((HSE_VALUE / PLL_M) * PLL_N) / PLL_P
+SYSCLK = ((8000000 / 8) * 336) / 2
+SYSCLK = 168000000 = 168 MHz
+</code></pre><p>One of the reasons that an external oscillator is available and used is that
+having the high speed signal outside of the MCU reduces the noise inside it.
+Once the signal is in, it can be scaled up easily with a simple PLL circuit.
+Also, this setup for setting the clock speed is simple enough that it can be
+called to configure a lower clock speed whenever needed to reduce energy
+consumption. Once set up, the <code>SystemCoreClock</code> variable can be used throughout
+the code to know what the clock speed is. It is important to remember that if
+the value of <code>HSE_VALUE</code> does not reflect the real on board hardware, the value
+of <code>SystemCoreClock</code> will not be the correct MCU frequency.</p><h2 id=startup-sequence>Startup sequence</h2><p>The startup sequence of the MCU depends on the configuration of the boot pins.
+On the Discovery board, BOOT0 is set to low. According to the boot modes table
+in the reference manual, whenever BOOT0 is set to low, the main flash memory is
+selected as the memory location to boot from. This memory location is
+<code>0x8000000</code>. It is possible to find this both in the memory organization in the
+reference manual and the linker script included in the reference project.
+Another observation is that the linker script places the Interrupt Vector Table
+at the beginning of the flash address space. This vector table is located in the
+assembly startup code file:</p><div class=highlight><pre class=chroma><code class=language-asm data-lang=asm><span class=nl>g_pfnVectors:</span>
+  <span class=na>.word</span>  <span class=no>_estack</span>
+  <span class=na>.word</span>  <span class=no>Reset_Handler</span>
+  <span class=na>.word</span>  <span class=no>NMI_Handler</span>
+<span class=na>...</span>
+</code></pre></div><p>It is possible to see this table is in accordance to the vector table found in
+the reference manual. So the routine which is called on reset is <code>Reset_Handler</code>
+which is also found in the assembly startup code. This method, initializes
+memory, calls <code>SystemInit</code>, <code>__libc_init_array</code> and finally <code>main</code>.</p><h2 id=firmware-size>Firmware size</h2><p>In order to reduce the firmware size for the MCU, it is necessary to pass the
+<code>-fdata-sections -ffunction-sections</code> options to the compiler as well as the
+<code>--gc-sections</code> to the linker. These flags will strip out the unused data and
+functions from the output binary. It is possible to see the size difference with
+the <code>size</code> command.</p><div class=highlight><pre class=chroma><code class=language-shell data-lang=shell><span class=c1># Here is the output size with the unused code removed:</span>
+$ arm-none-eabi-size main.elf
+ text    data     bss     dec     hex filename
+<span class=m>11524</span>    <span class=m>1104</span>   <span class=m>78800</span>   <span class=m>91428</span>   <span class=m>16524</span> main.elf
+
+<span class=c1># Here it is without unused code stripped:</span>
+$ arm-none-eabi-size main.elf
+ text    data     bss     dec     hex filename
+<span class=m>92584</span>    <span class=m>1152</span>   <span class=m>78804</span>  <span class=m>172540</span>   2a1fc main.elf
+
+<span class=c1># That is an 88% or 81 KB size decrease with the flags.</span>
+</code></pre></div><h2 id=freertos-time-slicing>FreeRTOS time slicing</h2><p>In the reference project, two tasks with the same priority are started and it is
+the responsibility of the real time kernel to run them both concurrently. It
+does so by switching back and forth between each task at a rate of
+<code>configTICK_RATE_HZ</code> which is defined in <code>FreeRTOSConfig.h</code>. The default value
+is 1000 Hz which does not seem high since our MCU is running at 168 MHz.
+However, it is important to know that this context switching between tasks is
+not free. Also, by using delay functions such as <code>vTaskDelay</code>, a task can hand
+over its time to another task depending on the context. By using different
+priority levels in different tasks, it is possible to put more importance on
+certain tasks according to the application needs.</p><h2 id=chip-programming-and-debugging>Chip programming and debugging</h2><p>The <a href=https://github.com/texane/stlink>texane/stlink</a> project offers convenient
+tools to program and debug the MCU. For programming, it is necessary to create a
+binary file from the output <code>elf</code> file using <code>arm-none-eabi-objcopy</code>. This
+process strips out the &ldquo;starting&rdquo; address of <code>0x8000000</code> but it is specified in
+the <code>st-flash</code> command parameters so that the resulting binary is placed at the
+correct address. To debug, the <code>st-util</code> command is used. It starts a <code>gdb</code>
+server which can be connected to using <code>arm-none-eabi-gdb</code> and the created <code>elf</code>
+file. This <code>elf</code> file contains the necessary symbols to ease the debugging
+process. Standard <code>gdb</code> commands can then be used to step through code and
+observe CPU registers.</p><h2 id=future-investigations>Future investigations</h2><p>In future posts, I would like to investigate further the following aspects:</p><ul><li>CPU DSP instructions</li><li>FreeRTOS memory management</li><li>FreeRTOS task communication and synchronization</li><li>Various on-board devices</li><li>Firmware programming in Rust</li><li>Firmware programming in Golang</li></ul></article><hr><footer><p><a href=https://github.com/berfr>GitHub</a> /
+<a href=https://git.sr.ht/~berfr>SourceHut</a></p><p><a href=/publickey.txt>67CA4E4F727349D3</a></p><p><a href=mailto:me@berfr.me>me@berfr.me</a></p><p><a href=/index.xml>RSS</a></p></footer></body></html>

@@ -1,0 +1,82 @@
+<!doctype html><html lang=en-us><head><title>Deploying to S3 with Sourcehut | berfr blog</title><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1"><link rel=canonical href=https://berfr.me/posts/deploying-s3-sourcehut/><link rel=stylesheet href=/css/styles.min.css></head><body><header><h2><a href=/>berfr blog</a></h2></header><hr><article class=post><header><h1>Deploying to S3 with Sourcehut</h1><div class=post-time>Posted on February 05, 2020.</div></header><p>In this article, we will go through the process of automatically building and
+deploying this <a href=https://gohugo.io>Hugo</a> website to <a href=https://aws.amazon.com/s3>Amazon S3</a> using <a href=https://sourcehut.org>Sourcehut</a>
+<a href=https://builds.sr.ht>builds.sr.ht</a>. This post assumes you already have a static website that is
+hosted on S3; there are plenty of guides online concerning this if it is not the
+case.</p><h2 id=iam-policy-for-s3-bucket-access>IAM policy for S3 bucket access</h2><p>The first step is to create an <a href=https://docs.aws.amazon.com/IAM/latest/UserGuide/id_users.html>IAM user</a> with an <a href=https://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies.html>IAM policy</a> that can only
+modify the contents of the specific S3 bucket. This will ensure that if the user
+credentials are compromised, only the specific bucket is affected and not your
+complete AWS account. This is important since this user secret key will be saved
+on Sourcehut which is not immune to security bugs and breaches.</p><p>Once the new user is created, note its Access Key ID and Secret Access Key. We
+will be using these to access AWS from the CI environment.</p><p>We will be using the <a href=https://docs.aws.amazon.com/cli/latest/reference/s3/sync.html><code>s3 sync</code></a> command from the <a href=https://aws.amazon.com/cli/>AWS CLI</a> tool which requires
+specific permissions to work. To get it to execute without errors, the following
+policy is attached directly to the IAM user:</p><div class=highlight><pre class=chroma><code class=language-json data-lang=json><span class=p>{</span>
+    <span class=nt>&#34;Version&#34;</span><span class=p>:</span> <span class=s2>&#34;2012-10-17&#34;</span><span class=p>,</span>
+    <span class=nt>&#34;Statement&#34;</span><span class=p>:</span> <span class=p>[</span>
+        <span class=p>{</span>
+            <span class=nt>&#34;Sid&#34;</span><span class=p>:</span> <span class=s2>&#34;VisualEditor0&#34;</span><span class=p>,</span>
+            <span class=nt>&#34;Effect&#34;</span><span class=p>:</span> <span class=s2>&#34;Allow&#34;</span><span class=p>,</span>
+            <span class=nt>&#34;Action&#34;</span><span class=p>:</span> <span class=p>[</span>
+                <span class=s2>&#34;s3:PutObject&#34;</span><span class=p>,</span>
+                <span class=s2>&#34;s3:ListBucket&#34;</span><span class=p>,</span>
+                <span class=s2>&#34;s3:DeleteObject&#34;</span>
+            <span class=p>],</span>
+            <span class=nt>&#34;Resource&#34;</span><span class=p>:</span> <span class=p>[</span>
+                <span class=s2>&#34;arn:aws:s3:::berfr.me&#34;</span><span class=p>,</span>
+                <span class=s2>&#34;arn:aws:s3:::berfr.me/*&#34;</span>
+            <span class=p>]</span>
+        <span class=p>}</span>
+    <span class=p>]</span>
+<span class=p>}</span>
+</code></pre></div><h2 id=sourcehut-secrets>Sourcehut secrets</h2><p>We will now copy the IAM user credentials noted earlier into Sourcehut <a href=https://man.sr.ht/builds.sr.ht/#secrets>build
+secrets</a> so it is available during CI builds. Create a new secret of <code>File</code> type
+at <code>~/.aws/credentials</code> with the content in this format:</p><pre><code>[s3-berfr.me]
+aws_access_key_id=AKIAIOSFODNN7EXAMPLE
+aws_secret_access_key=wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
+</code></pre><p>You can give the file minimum read permissions <code>400</code>. Save the secret and note
+the resulting UUID; we will use it in the build manifest file.</p><h2 id=sourcehut-build-manifest>Sourcehut build manifest</h2><p>The next step will be to create a build <a href=https://man.sr.ht/builds.sr.ht/manifest.md>manifest</a>: the <code>.build.yml</code> file in the
+root of the repository with the information and instructions to build and deploy
+the static website. Here are the contents for this specific site:</p><div class=highlight><pre class=chroma><code class=language-YAML data-lang=YAML><span class=k>image</span><span class=p>:</span><span class=w> </span>fedora/<span class=m>31</span><span class=w>
+</span><span class=w></span><span class=k>packages</span><span class=p>:</span><span class=w>
+</span><span class=w>    </span>- awscli<span class=w>
+</span><span class=w>    </span>- hugo<span class=w>
+</span><span class=w></span><span class=k>sources</span><span class=p>:</span><span class=w>
+</span><span class=w>    </span>- https<span class=p>:</span>//git.sr.ht/~berfr/berfr.me<span class=w>
+</span><span class=w></span><span class=k>secrets</span><span class=p>:</span><span class=w>
+</span><span class=w>    </span>- 1af67a38-6cf0-4f09-98fc-8776b8987160<span class=w>
+</span><span class=w></span><span class=k>tasks</span><span class=p>:</span><span class=w>
+</span><span class=w>    </span>- <span class=k>build</span><span class=p>:</span><span class=w> </span><span class=sd>|
+</span><span class=sd>        cd berfr.me</span><span class=w>
+</span><span class=w>        </span>make<span class=w> </span>build<span class=w>
+</span><span class=w>        </span>git<span class=w> </span>describe<span class=w> </span>--exact-match<span class=w> </span>HEAD<span class=w> </span>||<span class=w> </span>complete-build<span class=w>
+</span><span class=w>    </span>- <span class=k>deploy</span><span class=p>:</span><span class=w> </span><span class=sd>|
+</span><span class=sd>        cd berfr.me</span><span class=w>
+</span><span class=w>        </span>make<span class=w> </span>deploy<span class=w>
+</span></code></pre></div><p>As you can see, the file is pretty simple. Here is a description of some of the
+components:</p><ul><li><strong>image</strong>: There is a
+<a href=https://man.sr.ht/builds.sr.ht/compatibility.md>variety</a> of build images
+available on Sourcehut. Here, I am using <code>fedora/31</code> as it is what I am
+running locally and so the package versions used will be quite similar.</li><li><strong>packages</strong>: These extra packages will be installed using the distribution
+package manager. We only need <code>hugo</code> for building and <code>awscli</code> for
+deploying.</li><li><strong>secrets</strong>: By specifying the UUID of the secret created above, the aws
+credentials file will become available in the build environment.</li><li><strong>tasks</strong>: We have two tasks: build and deploy which simply call procedures
+declared in the Makefile. The <code>git describe --exact-match HEAD || complete-build</code> line will prevent the execution of the deploy task if the
+latest commit is not an annotated tag.</li></ul><p>The Makefile used is also easy to follow:</p><div class=highlight><pre class=chroma><code class=language-Makefile data-lang=Makefile><span class=nf>.PHONY</span><span class=o>:</span> <span class=n>build</span> <span class=n>deploy</span> <span class=n>release</span>
+
+<span class=nf>build</span><span class=o>:</span>
+	hugo --cleanDestinationDir --minify
+
+<span class=nf>deploy</span><span class=o>:</span> <span class=n>build</span>
+	aws --region ca-central-1 --profile s3-berfr.me s3 sync public/ s3://berfr.me/ --delete
+
+<span class=nf>release</span><span class=o>:</span> <span class=n>build</span>
+	git tag -s -a <span class=s2>&#34;`date +\&#34;%y-%m-%d-%H-%M\&#34;`&#34;</span> -m <span class=s2>&#34;`date`&#34;</span>
+</code></pre></div><p>By using a Makefile, we can make changes to the commands needed in a single file
+and use it both locally and in the build manifest. The same goes for specifying
+a unique AWS profile name such as <code>s3-berfr.me</code>; we are able to use it in both
+environments.</p><p>With these two files pushed to <a href=https://git.sr.ht>git.sr.ht</a>, the build should automatically start
+and be visible at <a href=https://builds.sr.ht>builds.sr.ht</a>. To trigger a deployment, simply run <code>make release</code> followed by <code>git push --follow-tags</code>.</p><p>You can find the complete source code for this webite at
+<a href=https://git.sr.ht/~berfr/berfr.me>https://git.sr.ht/~berfr/berfr.me</a> and the builds for it at
+<a href=https://builds.sr.ht/~berfr/berfr.me/.build.yml>https://builds.sr.ht/~berfr/berfr.me/.build.yml</a>. If you have any questions or
+comments regarding this article, feel free to email me personally or write to my
+<a href=https://lists.sr.ht/~berfr/public-inbox>public inbox</a>.</p></article><hr><footer><p><a href=https://github.com/berfr>GitHub</a> /
+<a href=https://git.sr.ht/~berfr>SourceHut</a></p><p><a href=/publickey.txt>67CA4E4F727349D3</a></p><p><a href=mailto:me@berfr.me>me@berfr.me</a></p><p><a href=/index.xml>RSS</a></p></footer></body></html>
