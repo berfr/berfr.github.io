@@ -2,7 +2,7 @@
 
 setup:
 	rm -rf public
-	git clone git@github.com:berfr/berfr.github.io.git public
+	git clone --branch master git@github.com:berfr/berfr.github.io.git public
 
 build:
 	rm -rf public/*
