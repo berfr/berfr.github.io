@@ -1,0 +1,39 @@
+<!doctype html><html lang=en-us><head><title>fakesocial: Fake social network using generated content | berfr blog</title><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1"><link rel=canonical href=https://berfr.me/posts/fakesocial/><link rel=stylesheet href=/css/styles.min.css></head><body><header><h2><a href=/>berfr blog</a></h2></header><hr><article class=post><header><h1>fakesocial: Fake social network using generated content</h1><div class=post-time>Posted on June 06, 2020.</div></header><p>Last weekend, I released <a href=https://fakesocial.net>fakesocial</a> (<a href=https://github.com/berfr/fakesocial>source code</a>) after working on it for
+the last few weeks and am pretty pleased with the result. Here, I will discuss a
+few things about the project.</p><p>To start with, fakesocial is a simple social network consisting of fake users
+which have connections, make posts and also like and comment on these posts.
+These user profiles use generated images as profile pictures and generated text
+as posts and comments. The social network is then packaged as a website and
+served on the internet.</p><h2 id=data-sources-and-content-generation>Data sources and content generation</h2><p>The project is really just a collection of different sources of data packaged
+with a nice web based user interface. For the profile pictures, images are taken
+from the <a href=https://thispersondoesnotexist.com>This Person Does Not Exist</a> website which in turn uses <a href=https://en.wikipedia.org/wiki/StyleGAN>StyleGan</a> to
+generate them. For the posts and comments, a simple <a href=https://www.kaggle.com/coolcoder22/quotes-dataset>quotes dataset</a> is used in
+addition to the <a href=https://github.com/jsvine/markovify>Markovify</a> package to generate new quotes from the dataset.
+This package is also used with a <a href=https://github.com/jneidel/job-titles>job titles dataset</a> to generate new job titles
+for the fake users. The rest of the content on the fake social network is
+generated from scrambling existing company, city and personal names.</p><p>Because the content on this website is generated using datasets, it is biased;
+the images, posts, titles, etc. ultimately depend on the data that was used in
+training the models. Even if <a href=https://github.com/NVlabs/ffhq-dataset>70,000 images</a> seems like a big number of images,
+it is still not a complete representation of the humans of the world. It is
+important to keep this in mind when viewing this project and looking at
+generated content in general.</p><h2 id=python-and-vuejs>Python and Vue.js</h2><p>The generation of data is done using Python and <a href=https://www.sqlalchemy.org>SQLAlchemy</a> using a local
+<a href=https://sqlite.org/index.html>SQLite</a> database file. Using this file, new events are added using existing
+events. For example, on an <code>add_comment</code> event, the program will fetch a post
+that was previously added to which the comment will be added. With this setup,
+it is possible to continue where we previously left off. Once the specified
+number of events is reached, the Python program will generate a complete static
+website suitable for hosting anywhere. The database is converted to a series of
+JSON files that are loaded by the app front end.</p><p>The front end is implemented with <a href=https://vuejs.org>Vue.js</a> and <a href=https://router.vuejs.org>Vue Router</a> using a few simple
+components. Using Vue Router, it is possible to link to user profiles and user
+posts easily. For example, see <a href=https://fakesocial.net/#/user/34>User 34</a> and <a href=https://fakesocial.net/#/post/1069>Post 1069</a>. The data files are
+loaded as needed and so loading is quite fast.</p><p>This type of website generation is great since it can be hosted anywhere easily.
+In our case, it is hosted using <a href=https://pages.github.com/>GitHub Pages</a> which is free for public
+repositories.</p><h2 id=whats-next>What&rsquo;s next</h2><p>I really like that there is no maintenance to do on this website because of the
+way it is hosted. Also, it is not costing me anything to run except for the
+domain registration which I may not renew next year. In that case, the website
+will still be available at <a href=https://berfr.github.io/fakesocial>https://berfr.github.io/fakesocial</a>.</p><p>I will probably run the <code>fakesocial</code> program a few times on the current database
+file to generate more data in the next few weeks. I would also like to
+experiment with other types of sentences files for post and comment content. If
+you have any ideas or comments concerning fakesocial, feel free to open a pull
+request, issue or email me!</p></article><hr><footer><p><a href=https://github.com/berfr>GitHub</a> /
+<a href=https://git.sr.ht/~berfr>SourceHut</a></p><p><a href=/publickey.txt>67CA4E4F727349D3</a></p><p><a href=mailto:berfr4@gmail.com>berfr4@gmail.com</a></p><p><a href=/index.xml>RSS</a></p></footer></body></html>
