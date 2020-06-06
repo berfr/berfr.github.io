@@ -1,4 +1,4 @@
-baseURL = "https://berfr.me/"
+baseURL = "https://berfr.github.io/"
 languageCode = "en-us"
 title = "berfr blog"
 disableKinds = ["taxonomy", "taxonomyTerm", "section"]
